@@ -1,0 +1,88 @@
+databaseChangeLog:
+  - changeSet:
+      id: 0001
+      author: Alexey
+      changes:
+        - createTable:
+            tableName: validators
+            columns:
+              - column:
+                  name: owner
+                  type: varchar
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: name
+                  type: text
+                  constraints:
+                    nullable: false
+              - column:
+                  name: num_jailed
+                  type: integer
+                  constraints:
+                    nullable: false
+              - column:
+                  name: jailed
+                  type: boolean
+                  constraints:
+                    nullable: false
+              - column:
+                  name: status
+                  type: varchar
+                  constraints:
+                    nullable: false
+              - column:
+                  name: commission
+                  type: integer
+                  constraints:
+                    nullable: false
+              - column:
+                  name: max_delegation
+                  type: bigint
+                  constraints:
+                    nullable: false
+              - column:
+                  name: total_stake
+                  type: bigint
+                  constraints:
+                    nullable: false
+              - column:
+                  name: self_stake
+                  type: bigint
+                  constraints:
+                    nullable: false
+              - column:
+                  name: total_validator_success
+                  type: integer
+                  constraints:
+                    nullable: false
+              - column:
+                  name: total_validator_failure
+                  type: integer
+                  constraints:
+                    nullable: false
+              - column:
+                  name: total_leader_success
+                  type: integer
+                  constraints:
+                    nullable: false
+              - column:
+                  name: total_leader_failure
+                  type: integer
+                  constraints:
+                    nullable: false
+              - column:
+                  name: total_signatures_ignored
+                  type: integer
+                  constraints:
+                    nullable: false
+              - column:
+                  name: total_slash
+                  type: integer
+                  constraints:
+                    nullable: false
+              - column:
+                  name: updated_at
+                  type: timestamp
+                  constraints:
+                    nullable: false
