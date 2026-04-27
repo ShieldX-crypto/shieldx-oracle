@@ -5,5 +5,9 @@ public enum ValidatorListStatus {
     WAITING,
     JAILED,
     INACTIVE,
-    ELECTED
+    ELECTED;
+
+    public static ValidatorListStatus from(String value) {
+        return value == null ? null : ValidatorListStatus.valueOf(value.toUpperCase());
+    }
 }

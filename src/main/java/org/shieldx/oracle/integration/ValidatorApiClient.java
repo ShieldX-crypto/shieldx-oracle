@@ -7,6 +7,7 @@ import org.shieldx.oracle.dto.validator.ValidatorDataWrapper;
 import org.shieldx.oracle.dto.validator.ValidatorDto;
 import org.shieldx.oracle.dto.validator.ValidatorListDataWrapper;
 import org.shieldx.oracle.exception.ValidatorNotFoundException;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Component;
@@ -20,6 +21,8 @@ import java.time.Duration;
 @Component
 @RequiredArgsConstructor
 public class ValidatorApiClient {
+    @Value("${klever.api.page-size}")
+    private int pageSize;
 
     private final WebClient kleverWebClient;
 
@@ -36,13 +39,32 @@ public class ValidatorApiClient {
     }
 
     public Flux<ValidatorDto> fetchAllValidators() {
+        int limit = 50;
+
+        return fetchPage(0, limit)
+                .expand(response -> {
+                    int self = response.getPagination().getSelf();
+                    int totalPages = response.getPagination().getTotalPages();
+                    if (self == totalPages) {
+                        return Mono.empty(); // стоп
+                    }
+                    int nextPage = response.getPagination().getNext();
+                    return fetchPage(nextPage, limit);
+                })
+                .flatMap(response ->
+                        Flux.fromIterable(response.getData().getValidators())
+                );
+    }
+
+
+    private Mono<PaginatedApiResponse<ValidatorListDataWrapper>> fetchPage(int page, int limit) {
         return kleverWebClient.get()
                 .uri(u -> u.path("/v1.0/validator/list")
-                        .queryParam("limit", 100)
-                        .queryParam("canDelegate", true).build())
+                        .queryParam("limit", limit)
+                        .queryParam("page", page)
+                        .build())
                 .retrieve()
-                .bodyToMono(new ParameterizedTypeReference<PaginatedApiResponse<ValidatorListDataWrapper>>() {
-                })
-                .flatMapMany(r -> Flux.fromIterable(r.getData().getValidators()));
+                .bodyToMono(new ParameterizedTypeReference<>() {
+                });
     }
 }

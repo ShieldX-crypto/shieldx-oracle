@@ -1,0 +1,9 @@
+spring:
+  r2dbc:
+    url: ${SHIELDX_R2DBC_URL}
+    username: ${SHIELDX_R2DBC_USERNAME}
+    password: ${SHIELDX_R2DBC_PASSWORD}
+  liquibase:
+    url: ${SHIELDX_LIQUIBASE_URL}
+    password: ${SHIELDX_LIQUIBASE_PASSWORD}
+    user: ${SHIELDX_LIQUIBASE_USER}

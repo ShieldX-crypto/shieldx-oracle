@@ -1,22 +1,27 @@
 package org.shieldx.oracle.entity;
 
-import jakarta.persistence.*;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.relational.core.mapping.Table;
 
 import java.time.Instant;
 
-@Entity
 @Getter
 @Setter
 @Table(name = "validators")
+@EqualsAndHashCode(exclude = {"id", "updatedAt"})
 public class Validator {
     @Id
+    private Long id;
     private String owner;
     private String name;
     private long totalStake;
     private long selfStake;
+    private boolean canDelegate;
     private int numJailed;
+    private int maxDelegation;
     private int totalSlash;
     private int totalValidatorSuccess;
     private int totalValidatorFailure;
@@ -24,8 +29,7 @@ public class Validator {
     private int totalLeaderFailure;
     private int totalSignaturesIgnored;
     private int commission;
-    @Enumerated(EnumType.STRING)
     private ValidatorListStatus status;
     private boolean jailed;
-    private Instant updatedAt;
+    private Instant updatedAt = Instant.now();
 }

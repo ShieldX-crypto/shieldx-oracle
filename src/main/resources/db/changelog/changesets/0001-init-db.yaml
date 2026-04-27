@@ -7,10 +7,17 @@ databaseChangeLog:
             tableName: validators
             columns:
               - column:
+                  name: id
+                  type: integer
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+              - column:
                   name: owner
                   type: varchar
                   constraints:
-                    primaryKey: true
+                    nullable: false
+                    unique: true
               - column:
                   name: name
                   type: text
@@ -19,6 +26,11 @@ databaseChangeLog:
               - column:
                   name: num_jailed
                   type: integer
+                  constraints:
+                    nullable: false
+              - column:
+                  name: can_delegate
+                  type: boolean
                   constraints:
                     nullable: false
               - column:
@@ -86,3 +98,10 @@ databaseChangeLog:
                   type: timestamp
                   constraints:
                     nullable: false
+        - createIndex:
+            indexName: idx_validators_owners
+            unique: true
+            tableName: validators
+            columns:
+              - column:
+                  name: owner
