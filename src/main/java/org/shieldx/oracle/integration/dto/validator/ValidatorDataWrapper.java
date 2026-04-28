@@ -1,7 +1,7 @@
-package org.shieldx.oracle.dto.validator;
+package org.shieldx.oracle.integration.dto.validator;
 
 import lombok.Data;
-import org.shieldx.oracle.dto.ApiData;
+import org.shieldx.oracle.integration.dto.ApiData;
 
 @Data
 public class ValidatorDataWrapper implements ApiData {

@@ -22,6 +22,9 @@ public class RiskScoreHandler implements DomainEventHandler<ValidatorMetricsChan
     @Override
     public Mono<Void> handle(ValidatorMetricsChangedEvent event) {
         log.trace("Recalculating risk score for validator: {}", event.after().getOwner());
-        return riskService.recalculate(event.after());
+        return riskService
+                .calculate(event.after().getOwner())
+                .doOnSuccess(risk -> log.debug("Recalculated risk score: {}", risk))
+                .then();
     }
 }

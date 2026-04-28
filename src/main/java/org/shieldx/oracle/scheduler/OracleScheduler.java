@@ -2,9 +2,9 @@ package org.shieldx.oracle.scheduler;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.shieldx.oracle.dto.mapper.ValidatorMapper;
+import org.shieldx.oracle.mapper.ValidatorMapper;
 import org.shieldx.oracle.entity.Validator;
-import org.shieldx.oracle.integration.ValidatorApiClient;
+import org.shieldx.oracle.integration.KleverApiClient;
 import org.shieldx.oracle.service.ValidatorService;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -15,14 +15,14 @@ import java.util.List;
 @Component
 @RequiredArgsConstructor
 public class OracleScheduler {
-    private final ValidatorApiClient validatorApiClient;
+    private final KleverApiClient kleverApiClient;
     private final ValidatorService validatorService;
     private final ValidatorMapper validatorMapper;
 
-    @Scheduled(cron = "*/30 * * * * *")
+    @Scheduled(cron = "${klever.api.snapshot-interval}")
     public void fetchAllValidators() {
         log.info("Fetching all validators");
-        validatorApiClient
+        kleverApiClient
                 .fetchAllValidators()
                 .buffer(50)
                 .flatMap(validators -> {

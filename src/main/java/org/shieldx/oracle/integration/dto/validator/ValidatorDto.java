@@ -1,4 +1,4 @@
-package org.shieldx.oracle.dto.validator;
+package org.shieldx.oracle.integration.dto.validator;
 
 import lombok.Data;
 

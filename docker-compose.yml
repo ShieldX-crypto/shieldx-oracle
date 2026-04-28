@@ -10,12 +10,3 @@ services:
       - "./docker-volumes/postgres:/var/lib/postgresql/data"
     ports:
       - "5432:5432"
-  shieldx:
-    image: oracle-app
-    environment:
-      SHIELDX_R2DBC_URL: r2dbc:postgresql://postgres:5432/shieldx
-      SHIELDX_R2DBC_USERNAME: local
-      SHIELDX_R2DBC_PASSWORD: local
-      SHIELDX_LIQUIBASE_URL: jdbc:postgresql://postgres:5432/shieldx
-      SHIELDX_LIQUIBASE_PASSWORD: local
-      SHIELDX_LIQUIBASE_USER: local

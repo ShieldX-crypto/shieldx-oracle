@@ -3,14 +3,22 @@ package org.shieldx.oracle.service.impl;
 import jakarta.annotation.Nullable;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.shieldx.oracle.api.dto.PageResponse;
+import org.shieldx.oracle.api.dto.validator.ValidatorFilter;
+import org.shieldx.oracle.api.dto.validator.ValidatorSummaryDto;
 import org.shieldx.oracle.entity.Validator;
 import org.shieldx.oracle.events.DomainEvent;
 import org.shieldx.oracle.events.ValidatorJailedEvent;
 import org.shieldx.oracle.events.ValidatorMetricsChangedEvent;
 import org.shieldx.oracle.events.ValidatorUnjailedEvent;
 import org.shieldx.oracle.infrastructure.DomainEventPublisher;
-import org.shieldx.oracle.repository.ReactiveValidatorRepository;
+import org.shieldx.oracle.mapper.ValidatorMapper;
+import org.shieldx.oracle.repository.ValidatorRepository;
 import org.shieldx.oracle.service.ValidatorService;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.r2dbc.core.R2dbcEntityTemplate;
+import org.springframework.data.relational.core.query.Criteria;
+import org.springframework.data.relational.core.query.Query;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.reactive.TransactionalOperator;
 import reactor.core.publisher.Flux;
@@ -24,10 +32,13 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class ReactiveValidatorServiceImpl implements ValidatorService {
-    private final ReactiveValidatorRepository validatorRepository;
+    private final ValidatorRepository validatorRepository;
     private final TransactionalOperator tx;
     private final DomainEventPublisher publisher;
+    private final R2dbcEntityTemplate r2dbcEntityTemplate;
+    private final ValidatorMapper validatorMapper;
 
+    @Override
     public Mono<Void> saveBatch(List<Validator> incoming) {
         List<String> owners = incoming.stream()
                 .map(Validator::getOwner)
@@ -43,7 +54,6 @@ public class ReactiveValidatorServiceImpl implements ValidatorService {
                         )
                 );
     }
-
 
 
     private Mono<Void> processOne(Validator incoming, @Nullable Validator existing) {
@@ -89,5 +99,72 @@ public class ReactiveValidatorServiceImpl implements ValidatorService {
         return Flux.fromIterable(events)
                 .flatMap(publisher::publishReactive)
                 .then();
+    }
+
+    @Override
+    public Flux<Validator> findAll() {
+        return validatorRepository.findAll();
+    }
+
+    @Override
+    public Mono<PageResponse<ValidatorSummaryDto>> findAll(ValidatorFilter filter) {
+        Criteria criteria = buildCriteria(filter);
+
+        Query query = Query.query(criteria)
+                .sort(buildSort(filter))
+                .limit(filter.getSize())
+                .offset((long) filter.getPage() * filter.getSize());
+
+        Mono<Long> count = r2dbcEntityTemplate
+                .count(Query.query(criteria), Validator.class);
+
+        Flux<ValidatorSummaryDto> content = r2dbcEntityTemplate
+                .select(Validator.class)
+                .matching(query)
+                .all()
+                .map(Validator::getOwner)
+                .collectList()
+                .flatMapMany(owners -> {
+                    if (owners.isEmpty()) {
+                        return Flux.empty();
+                    } else {
+                        return validatorRepository.findSummariesByOwnerIn(owners);
+                    }
+                })
+                .map(validatorMapper::toSummaryDto);
+
+        return Mono.zip(content.collectList(), count)
+                .map(tuple -> PageResponse.of(tuple.getT1(), tuple.getT2(), filter));
+    }
+
+    private Criteria buildCriteria(ValidatorFilter filter) {
+        Criteria criteria = Criteria.empty();
+        if (filter.getJailed() != null) {
+            criteria = criteria.and("jailed").is(filter.getJailed());
+        }
+        if (filter.getStatus() != null) {
+            criteria = criteria.and("status").is(filter.getStatus());
+        }
+        if (filter.getMaxCommission() != null) {
+            criteria = criteria.and("commission").lessThanOrEquals(filter.getMaxCommission());
+        }
+        return criteria;
+    }
+
+    private Sort buildSort(ValidatorFilter filter) {
+        String column = switch (filter.getSortBy()) {
+            case TOTAL_STAKE -> "totalStake";
+            case SELF_STAKE -> "selfStake";
+            case COMMISSION -> "commission";
+            case NUM_JAILED -> "numJailed";
+            case TOTAL_VALIDATOR_SUCCESS -> "totalValidatorSuccess";
+            case RISK_SCORE -> "totalStake"; // risk_score не в таблице validators — fallback
+        };
+        return Sort.by(
+                filter.getDirection() == ValidatorFilter.SortDirection.ASC
+                        ? Sort.Direction.ASC
+                        : Sort.Direction.DESC,
+                column
+        );
     }
 }

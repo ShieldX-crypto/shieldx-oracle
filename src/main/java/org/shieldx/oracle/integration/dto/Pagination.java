@@ -1,4 +1,4 @@
-package org.shieldx.oracle.dto;
+package org.shieldx.oracle.integration.dto;
 
 import lombok.Data;
 
