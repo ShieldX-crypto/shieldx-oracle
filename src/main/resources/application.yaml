@@ -1,3 +1,23 @@
 spring:
   application:
     name: oracle
+  sql:
+    init:
+      mode: never
+  liquibase:
+    enabled: true
+    change-log: classpath:db/changelog/db.changelog-master.yaml
+klever:
+  api:
+    base-url: ${KLEVER_API_BASE_URL:https://api.mainnet.klever.org}
+    timeout: ${KLEVER_API_TIMEOUT:3000ms}
+    page-size: ${KLEVER_API_PAGE_SIZE:50}
+    snapshot-interval: ${KLEVER_API_SNAPSHOT_INTERVAL:0 * * * * *}
+    unjail-contract-type: ${KLEVER_API_UNJAIL_CONTRACT_TYPE:10}
+risk-score:
+  w1: 0.40
+  w2: 0.35
+  w3: 0.15
+  w4: 0.10
+  lambda: 0.005
+  jail-norm: 20

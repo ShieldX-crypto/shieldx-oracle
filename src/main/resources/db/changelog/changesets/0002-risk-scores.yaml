@@ -1,0 +1,102 @@
+databaseChangeLog:
+  - changeSet:
+      id: 0002
+      author: Alexey
+      changes:
+        - createTable:
+            tableName: risk_scores
+            columns:
+              - column:
+                  name: id
+                  type: integer
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: validator_owner
+                  type: varchar
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_risk_scores_validator_owner
+                    references: validators(owner)
+              - column:
+                  name: jail_score
+                  type: numeric(6, 3)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: uptime_score
+                  type: numeric(6, 3)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: skin_score
+                  type: numeric(6, 3)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: total_score
+                  type: numeric(6, 3)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: tier
+                  type: varchar
+                  constraints:
+                    nullable: false
+              - column:
+                  name: model_version
+                  type: varchar
+                  constraints:
+                    nullable: false
+              - column:
+                  name: calculated_at
+                  type: timestamp
+                  constraints:
+                    nullable: false
+        - createIndex:
+            indexName: idx_risk_scores_validator_owner
+            tableName: risk_scores
+            columns:
+              - column:
+                  name: validator_owner
+        - createIndex:
+            indexName: idx_risk_scores_validator_owner_calculated_at
+            tableName: risk_scores
+            columns:
+              - column:
+                  name: validator_owner
+              - column:
+                  name: calculated_at
+
+  - changeSet:
+      id: 0003
+      author: Alexey
+      changes:
+        - createTable:
+            tableName: jail_events
+            columns:
+              - column:
+                  name: id
+                  type: integer
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: validator_owner
+                  type: varchar
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_jail_events_validator_owner
+                    references: validators(owner)
+              - column:
+                  name: detected_at
+                  type: timestamp
+                  constraints:
+                    nullable: false
+        - createIndex:
+            indexName: idx_jail_events_validator_owner
+            tableName: jail_events
+            columns:
+              - column:
+                  name: validator_owner
