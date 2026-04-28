@@ -124,13 +124,10 @@ public class ReactiveValidatorServiceImpl implements ValidatorService {
                 .all()
                 .map(Validator::getOwner)
                 .collectList()
-                .flatMapMany(owners -> {
-                    if (owners.isEmpty()) {
-                        return Flux.empty();
-                    } else {
-                        return validatorRepository.findSummariesByOwnerIn(owners);
-                    }
-                })
+                .flatMapMany(owners ->
+                        owners.isEmpty() ?
+                                Flux.empty() :
+                                validatorRepository.findSummariesByOwnerIn(owners))
                 .map(validatorMapper::toSummaryDto);
 
         return Mono.zip(content.collectList(), count)
