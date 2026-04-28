@@ -4,16 +4,19 @@ on:
   push:
     branches: [ "main" ]
 
+env:
+  IMAGE_NAME: ghcr.io/${{ github.repository }}
+
 jobs:
   test:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6.0.0
 
       - name: Set up JDK 17
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5.2.0
         with:
           distribution: temurin
           java-version: 17
@@ -32,6 +35,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Lowercase image name
+        run: echo "IMAGE_NAME=$(echo $IMAGE_NAME | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
+
       - name: Checkout
         uses: actions/checkout@v4
 
@@ -46,13 +52,13 @@ jobs:
 
       - name: Build Docker image
         run: |
-          docker build -t ghcr.io/${{ github.repository }}:latest .
+          docker build -t ${{ IMAGE_NAME }}:latest .
 
       - name: Login to GHCR
         run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
       - name: Push image
-        run: docker push ghcr.io/${{ github.repository }}:latest
+        run: docker push ${{ IMAGE_NAME }}:latest
 
   deploy:
     needs: build
@@ -66,7 +72,7 @@ jobs:
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
           script: |
-            docker pull ghcr.io/${{ github.repository }}:latest
+            docker pull ${{ IMAGE_NAME }}:latest
             cd /opt/oracle
             docker-compose down
             docker-compose up -d
