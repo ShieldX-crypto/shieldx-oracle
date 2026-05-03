@@ -13,7 +13,7 @@ class PolicyUtilTest {
     static final byte[] PRECOMPUTED_HEX_SHA256 = "d3a41264c43325a2f9cd5676316c75018490788d1d51027711633088926bf038".getBytes(StandardCharsets.UTF_8);
 
     @Test
-    void givenPolicy_encode_Sha256ShouldBeValid() throws Exception {
+    void givenPolicy_encode_Sha256ShouldBeValid() {
         Policy policy = new Policy(
                 "my_validator",
                 CoveredEvent.JAILED,
