@@ -6,6 +6,7 @@ import org.shieldx.oracle.mapper.ValidatorMapper;
 import org.shieldx.oracle.entity.Validator;
 import org.shieldx.oracle.integration.KleverApiClient;
 import org.shieldx.oracle.service.ValidatorService;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBooleanProperty;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -14,6 +15,7 @@ import java.util.List;
 @Slf4j
 @Component
 @RequiredArgsConstructor
+@ConditionalOnBooleanProperty("oracle.scheduling.enabled")
 public class OracleScheduler {
     private final KleverApiClient kleverApiClient;
     private final ValidatorService validatorService;
